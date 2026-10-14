@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <string>
 
 const int longueur = 10;
 const int largeur = 20;
@@ -9,11 +8,20 @@ struct Hero
 {
     int PV = 3;
     int x = 0;
-    int y = 11;
+    int y = 0;
 };
 
 
-void afficher(int grille[longueur*largeur], Hero& hero) {
+struct Ennemie
+{
+    int x = 0;
+    int y = 0;
+};
+
+
+
+
+void afficher(int grille[longueur*largeur], Hero& hero, Ennemie ene) {
     system("cls");
     for (int y = 0; y < largeur; y++) {
         for (int x = 0; x < longueur; x++) {
@@ -23,8 +31,14 @@ void afficher(int grille[longueur*largeur], Hero& hero) {
                 hero.y = y;
                 std::cout << "H";
             }
+            else if (x == ene.x && y == ene.y) {
+                ene.x = x;
+                ene.y = y;
+                std::cout << "X";
+            }
             else
             {
+                
                 if (sauv == 0) {
                     std::cout << ".";
                 }
@@ -34,15 +48,23 @@ void afficher(int grille[longueur*largeur], Hero& hero) {
                 if (sauv == 2) {
                     std::cout << "~";
                 }
+               
             }
+
+            
+               
         }
+  
         std::cout << '\n';
     }
 }
 
 
 
-void mouvementHero(Hero& hero, int grille[longueur*largeur]) {
+
+
+
+void mouvementHero(Hero& hero, int grille[longueur*largeur], Ennemie ene) {
     char touche;
     std::cin >> touche;
     if (touche == 'z' || touche == 'Z') {
@@ -53,7 +75,7 @@ void mouvementHero(Hero& hero, int grille[longueur*largeur]) {
         if (hero.y < 0) {
             hero.y += 1;
         }
-        afficher(grille, hero);
+        afficher(grille, hero, ene);
     }
     if (touche == 's' || touche == 'S') {
         hero.y += 1;
@@ -63,7 +85,7 @@ void mouvementHero(Hero& hero, int grille[longueur*largeur]) {
         if (hero.y > 19) {
             hero.y -= 1;
         }
-        afficher(grille, hero);
+        afficher(grille, hero, ene);
     }
     if (touche == 'd' || touche == 'D') {
         hero.x += 1;
@@ -73,7 +95,7 @@ void mouvementHero(Hero& hero, int grille[longueur*largeur]) {
         if (hero.x > 9) {
             hero.x -=1;
         }
-        afficher(grille, hero);
+        afficher(grille, hero, ene);
     }
     if (touche == 'q' || touche == 'Q') {
         hero.x -= 1;
@@ -83,7 +105,7 @@ void mouvementHero(Hero& hero, int grille[longueur*largeur]) {
         if (hero.x < 0) {
             hero.x += 1;
         }
-        afficher(grille, hero);
+        afficher(grille, hero, ene);
     }
 }
 
@@ -92,7 +114,14 @@ int main()
     int grille[longueur * largeur] = {};
 
     Hero p1;
+    p1.y = 1;
+
+    Ennemie e1;
+    e1.y = 1;
+    e1.x = 3;
     
+    
+
 
 
     for (int i = 0; i < longueur * largeur; i++) {
@@ -104,10 +133,10 @@ int main()
         }
     }
 
-    afficher(grille, p1);
+    afficher(grille, p1,e1);
     while (p1.PV > 0) {
         std::cout << "Tour du joueur ";
-        mouvementHero(p1,grille);
+        mouvementHero(p1,grille,e1);
     }
 }
 
