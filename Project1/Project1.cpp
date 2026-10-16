@@ -1,8 +1,10 @@
 
 #include <iostream>
+#include <random>
 
 const int longueur = 10;
 const int largeur = 20;
+const int nbEne = 4;
 
 struct Hero
 {
@@ -18,7 +20,7 @@ struct Ennemie
     int y = 0;
 };
 
-void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[]) {
+void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
     system("cls");
     for (int y = 0; y < largeur; y++) {
         for (int x = 0; x < longueur; x++) {
@@ -30,7 +32,7 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[]) {
             }
             else {
                 bool ennemiAffiche = false;
-                for (int i = 0; i < sizeof(ene); i++) {
+                for (int i = 0; i < nbEne; i++) {
                     if (x == ene[i].x && y == ene[i].y) {
                         std::cout << "X";
                         ennemiAffiche = true;
@@ -61,8 +63,9 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[]) {
 }
 
 
-void degats(Hero& hero, Ennemie ene[]) {
-    for (int i = 0; i < sizeof(ene); i++) {
+void degats(Hero& hero, Ennemie ene[nbEne]) {
+    
+    for (int i = 0; i < nbEne; i++) {
         if (ene[i].x == hero.x && ene[i].y == hero.y) {
             hero.PV -= 1;
             std::cout << '\n' << "Touche !";
@@ -72,7 +75,7 @@ void degats(Hero& hero, Ennemie ene[]) {
 
 
 
-    void mouvementHero(Hero & hero, int grille[longueur * largeur], Ennemie ene[]) {
+    void mouvementHero(Hero & hero, int grille[longueur * largeur], Ennemie ene[nbEne]) {
         std::cout << '\n' << "Tour du joueur " << '\n' << "PV du joueur :" << hero.PV;
     char touche;
     std::cin >> touche;
@@ -118,6 +121,70 @@ void degats(Hero& hero, Ennemie ene[]) {
     }
 }
 
+
+    void mouvementEnnemie(int grille[longueur * largeur], Ennemie ene[nbEne]) {
+        std::cout << "Tour Ennemie";
+        
+        for (int i = 0; i < nbEne; i++) {
+            int direct = rand() % 4;
+            int newx = ene[i].x;
+            int newy = ene[i].y;
+
+
+            if (direct == 0) {
+                newy -= 1;
+                if (grille[newy * longueur + newx] == 1) {
+                    newy += 1;
+                }
+                if (newy < 0) {
+                    newy += 1;
+                }
+                ene[i].y = newy;
+            }
+           
+            if (direct == 1) {
+                newy += 1;
+                if (grille[newy * longueur + newx] == 1) {
+                    newy -= 1;
+                }
+                if (newy > 19) {
+                    newy -= 1;
+                }
+                ene[i].y = newy;
+            }
+            
+            if (direct == 2) {
+                newx -= 1;
+                if (grille[newy * longueur + newx] == 1) {
+                    newx += 1;
+                }
+                if (newx < 0) {
+                    newx += 1;
+                }
+                ene[i].x = newx;
+            }
+            if (direct == 3) {
+                newx += 1;
+                if (grille[newy * longueur + newx] == 1) {
+                    newx -= 1;
+                }
+                if (newx > 9) {
+                    newx -= 1;
+                }
+                ene[i].x = newx;
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 int main()
 {
     int grille[longueur * largeur] = {};
@@ -127,7 +194,7 @@ int main()
 
 	
     
-    Ennemie nbEnnemie[4] = {{3,9},{4,16},{9,3},{7,0}};
+    Ennemie nbEnnemie[nbEne] = {{3,9},{4,16},{9,3},{7,0}};
 
 
 
@@ -143,6 +210,8 @@ int main()
     afficher(grille, p1, nbEnnemie);
     while (p1.PV > 0) {
         mouvementHero(p1,grille,nbEnnemie);
+        degats(p1, nbEnnemie);
+        mouvementEnnemie(grille, nbEnnemie);
         degats(p1, nbEnnemie);
     }
     if (p1.PV == 0) {
