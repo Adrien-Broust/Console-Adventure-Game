@@ -61,11 +61,19 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[]) {
 }
 
 
-
+void degats(Hero& hero, Ennemie ene[]) {
+    for (int i = 0; i < sizeof(ene); i++) {
+        if (ene[i].x == hero.x && ene[i].y == hero.y) {
+            hero.PV -= 1;
+            std::cout << '\n' << "Touche !";
+        }
+    }
+}
 
 
 
     void mouvementHero(Hero & hero, int grille[longueur * largeur], Ennemie ene[]) {
+        std::cout << '\n' << "Tour du joueur " << '\n' << "PV du joueur :" << hero.PV;
     char touche;
     std::cin >> touche;
     if (touche == 'z' || touche == 'Z') {
@@ -134,8 +142,12 @@ int main()
 
     afficher(grille, p1, nbEnnemie);
     while (p1.PV > 0) {
-        std::cout << "Tour du joueur ";
         mouvementHero(p1,grille,nbEnnemie);
+        degats(p1, nbEnnemie);
+    }
+    if (p1.PV == 0) {
+        system("cls");
+        std::cout << "GAME OVER";
     }
 }
 
