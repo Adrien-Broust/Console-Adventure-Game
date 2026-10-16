@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <random>
+#include <windows.h>
 
 const int longueur = 10;
 const int largeur = 20;
@@ -49,6 +50,9 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
                     if (sauv == 2) {
                         std::cout << "~";
                     }
+                    if (sauv == 5) {
+                        std::cout << "E";
+                    }
                 }
 
 
@@ -76,45 +80,33 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
 
 
     void mouvementHero(Hero & hero, int grille[longueur * largeur], Ennemie ene[nbEne]) {
-        std::cout << '\n' << "Tour du joueur " << '\n' << "PV du joueur :" << hero.PV;
+        std::cout << '\n'  << "PV du joueur :" << hero.PV;
     char touche;
     std::cin >> touche;
     if (touche == 'z' || touche == 'Z') {
         hero.y -= 1;
-        if (grille[hero.y * longueur + hero.x] == 1) {
-            hero.y += 1;
-        }
-        if (hero.y < 0) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.y < 0) {
             hero.y += 1;
         }
         afficher(grille, hero, ene);
     }
     if (touche == 's' || touche == 'S') {
         hero.y += 1;
-        if (grille[hero.y * longueur + hero.x] == 1) {
-            hero.y -= 1;
-        }
-        if (hero.y > 19) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.y > 19) {
             hero.y -= 1;
         }
         afficher(grille, hero, ene);
     }
     if (touche == 'd' || touche == 'D') {
         hero.x += 1;
-        if (grille[hero.y * longueur + hero.x] == 1) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.x > 9) {
             hero.x -= 1;
-        }
-        if (hero.x > 9) {
-            hero.x -=1;
         }
         afficher(grille, hero, ene);
     }
     if (touche == 'q' || touche == 'Q') {
         hero.x -= 1;
-        if (grille[hero.y * longueur + hero.x] == 1) {
-            hero.x += 1;
-        }
-        if (hero.x < 0) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.x < 0) {
             hero.x += 1;
         }
         afficher(grille, hero, ene);
@@ -123,7 +115,6 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
 
 
     void mouvementEnnemie(int grille[longueur * largeur], Ennemie ene[nbEne]) {
-        std::cout << "Tour Ennemie";
         
         for (int i = 0; i < nbEne; i++) {
             int direct = rand() % 4;
@@ -133,10 +124,7 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
 
             if (direct == 0) {
                 newy -= 1;
-                if (grille[newy * longueur + newx] == 1) {
-                    newy += 1;
-                }
-                if (newy < 0) {
+                if (grille[newy * longueur + newx] == 1 || newy < 0) {
                     newy += 1;
                 }
                 ene[i].y = newy;
@@ -144,10 +132,7 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
            
             if (direct == 1) {
                 newy += 1;
-                if (grille[newy * longueur + newx] == 1) {
-                    newy -= 1;
-                }
-                if (newy > 19) {
+                if (grille[newy * longueur + newx] == 1 || newy > 19) {
                     newy -= 1;
                 }
                 ene[i].y = newy;
@@ -155,69 +140,101 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
             
             if (direct == 2) {
                 newx -= 1;
-                if (grille[newy * longueur + newx] == 1) {
-                    newx += 1;
-                }
-                if (newx < 0) {
+                if (grille[newy * longueur + newx] == 1 || newx < 0) {
                     newx += 1;
                 }
                 ene[i].x = newx;
             }
             if (direct == 3) {
                 newx += 1;
-                if (grille[newy * longueur + newx] == 1) {
-                    newx -= 1;
-                }
-                if (newx > 9) {
+                if (grille[newy * longueur + newx] == 1 || newx > 9) {
                     newx -= 1;
                 }
                 ene[i].x = newx;
             }
         }
     }
+    
 
+    void niveau(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
+        afficher(grille, hero, ene);
+        while (grille[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
+            mouvementHero(hero, grille, ene);
+            degats(hero, ene);
+            mouvementEnnemie(grille, ene);
+            degats(hero, ene);
+        }
+       
+    }
 
-
-
-
-
-
+    bool victoire(int grille[longueur * largeur], Hero& hero) {
+        if (grille[hero.y * longueur + hero.x] == 5) {
+            return TRUE;
+        }
+    }
+    
+    bool defaite(Hero& hero) {
+        if (hero.PV == 0) {
+            return TRUE;
+        }
+    }
 
 
 
 int main()
 {
-    int grille[longueur * largeur] = {};
-
+    int grille1[longueur * largeur] = {};
+    int grille2[longueur * largeur] = {};
     Hero p1;
     p1.y = 1;
-
+    Hero p2;
+    p2.x = 4;
 	
     
-    Ennemie nbEnnemie[nbEne] = {{3,9},{4,16},{9,3},{7,0}};
+    Ennemie nbEnnemie[nbEne] = {};
 
 
 
     for (int i = 0; i < longueur * largeur; i++) {
-        grille[i] = 0;
+        grille1[i] = 0;
     }
     for (int i = 10; i < 13; i++) {
         for (int j = 5; j < 8; j++) {
-            grille[i * longueur + j] = 1;
+            grille1[i * longueur + j] = 1;
         }
     }
+    grille1[195] = 5;
 
-    afficher(grille, p1, nbEnnemie);
-    while (p1.PV > 0) {
-        mouvementHero(p1,grille,nbEnnemie);
-        degats(p1, nbEnnemie);
-        mouvementEnnemie(grille, nbEnnemie);
-        degats(p1, nbEnnemie);
+    for (int i = 0; i < longueur * largeur; i++) {
+        grille2[i] = 0;
     }
-    if (p1.PV == 0) {
+    for (int i = 2; i < 6; i++) {
+        for (int j = 1; j < 8; j++) {
+            grille2[i * longueur + j] = 2;
+        }
+    }
+    for (int i = 11; i < 19; i++) {
+        for (int j = 0; j < 8; j++) {
+            grille2[i * longueur + j] = 1;
+        }
+    }
+    grille2[190] = 5;
+
+
+    niveau(grille1, p1, nbEnnemie);
+    if (victoire(grille1, p1)) {
+        system("cls");
+        std::cout << "Niveau suivant";
+        Sleep(2500);
+        niveau(grille2, p2, nbEnnemie);
+    }
+    else if(defaite(p1)) {
         system("cls");
         std::cout << "GAME OVER";
     }
+   
+   
+    
 }
 
 
