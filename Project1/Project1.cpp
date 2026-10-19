@@ -1,11 +1,10 @@
 
 #include <iostream>
-#include <random>
+#include <vector>
 #include <windows.h>
 
-const int longueur = 10;
-const int largeur = 20;
-const int nbEne = 4;
+const int longueur = 20;
+const int largeur = 10;
 
 struct Hero
 {
@@ -21,8 +20,9 @@ struct Ennemie
     int y = 0;
 };
 
-void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
+void afficher(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
     system("cls");
+    size_t taille = ene.size();
     for (int y = 0; y < largeur; y++) {
         for (int x = 0; x < longueur; x++) {
             int sauv = grille[y * longueur + x];
@@ -33,7 +33,7 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
             }
             else {
                 bool ennemiAffiche = false;
-                for (int i = 0; i < nbEne; i++) {
+                for (int i = 0; i < taille; i++) {
                     if (x == ene[i].x && y == ene[i].y) {
                         std::cout << "X";
                         ennemiAffiche = true;
@@ -67,9 +67,9 @@ void afficher(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
 }
 
 
-void degats(Hero& hero, Ennemie ene[nbEne]) {
-    
-    for (int i = 0; i < nbEne; i++) {
+void degats(Hero& hero,  std::vector<Ennemie>& ene) {
+    size_t taille = ene.size();
+    for (int i = 0; i < taille; i++) {
         if (ene[i].x == hero.x && ene[i].y == hero.y) {
             hero.PV -= 1;
             std::cout << '\n' << "Touche !";
@@ -79,7 +79,7 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
 
 
 
-    void mouvementHero(Hero & hero, int grille[longueur * largeur], Ennemie ene[nbEne]) {
+    void mouvementHero(Hero & hero, int grille[longueur * largeur]) {
         std::cout << '\n'  << "PV du joueur :" << hero.PV;
     char touche;
     std::cin >> touche;
@@ -88,35 +88,35 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
         if (grille[hero.y * longueur + hero.x] == 1 || hero.y < 0) {
             hero.y += 1;
         }
-        afficher(grille, hero, ene);
+       
     }
     if (touche == 's' || touche == 'S') {
         hero.y += 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.y > 19) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.y > 9) {
             hero.y -= 1;
         }
-        afficher(grille, hero, ene);
+        
     }
     if (touche == 'd' || touche == 'D') {
         hero.x += 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.x > 9) {
+        if (grille[hero.y * longueur + hero.x] == 1 || hero.x > 19) {
             hero.x -= 1;
         }
-        afficher(grille, hero, ene);
+       
     }
     if (touche == 'q' || touche == 'Q') {
         hero.x -= 1;
         if (grille[hero.y * longueur + hero.x] == 1 || hero.x < 0) {
             hero.x += 1;
         }
-        afficher(grille, hero, ene);
+       
     }
 }
 
 
-    void mouvementEnnemie(int grille[longueur * largeur], Ennemie ene[nbEne]) {
-        
-        for (int i = 0; i < nbEne; i++) {
+    void mouvementEnnemie(int grille[longueur * largeur], std::vector<Ennemie>& ene) {
+        size_t taille = ene.size();
+        for (int i = 0; i < taille; i++) {
             int direct = rand() % 4;
             int newx = ene[i].x;
             int newy = ene[i].y;
@@ -132,7 +132,7 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
            
             if (direct == 1) {
                 newy += 1;
-                if (grille[newy * longueur + newx] == 1 || newy > 19) {
+                if (grille[newy * longueur + newx] == 1 || newy > 9) {
                     newy -= 1;
                 }
                 ene[i].y = newy;
@@ -147,7 +147,7 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
             }
             if (direct == 3) {
                 newx += 1;
-                if (grille[newy * longueur + newx] == 1 || newx > 9) {
+                if (grille[newy * longueur + newx] == 1 || newx > 19) {
                     newx -= 1;
                 }
                 ene[i].x = newx;
@@ -156,10 +156,10 @@ void degats(Hero& hero, Ennemie ene[nbEne]) {
     }
     
 
-    void niveau(int grille[longueur * largeur], Hero& hero, Ennemie ene[nbEne]) {
-        afficher(grille, hero, ene);
+    void niveau(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
         while (grille[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
-            mouvementHero(hero, grille, ene);
+            afficher(grille, hero, ene);
+            mouvementHero(hero, grille);
             degats(hero, ene);
             mouvementEnnemie(grille, ene);
             degats(hero, ene);
@@ -185,21 +185,23 @@ int main()
 {
     int grille1[longueur * largeur] = {};
     int grille2[longueur * largeur] = {};
+
+
+
     Hero p1;
     p1.y = 1;
     Hero p2;
     p2.x = 4;
 	
     
-    Ennemie nbEnnemie[nbEne] = {};
-
+    std::vector<Ennemie> nbEnnemie(3);
 
 
     for (int i = 0; i < longueur * largeur; i++) {
         grille1[i] = 0;
     }
-    for (int i = 10; i < 13; i++) {
-        for (int j = 5; j < 8; j++) {
+    for (int i = 4; i < 7; i++) {
+        for (int j = 10; j < 13; j++) {
             grille1[i * longueur + j] = 1;
         }
     }
@@ -213,7 +215,7 @@ int main()
             grille2[i * longueur + j] = 2;
         }
     }
-    for (int i = 11; i < 19; i++) {
+    for (int i = 5; i < 9; i++) {
         for (int j = 0; j < 8; j++) {
             grille2[i * longueur + j] = 1;
         }
