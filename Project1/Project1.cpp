@@ -20,12 +20,12 @@ struct Ennemie
     int y = 0;
 };
 
-void afficher(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
+void afficher(int map[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
     system("cls");
     size_t taille = ene.size();
     for (int y = 0; y < largeur; y++) {
         for (int x = 0; x < longueur; x++) {
-            int sauv = grille[y * longueur + x];
+            int sauv = map[y * longueur + x];
             if (x == hero.x && y == hero.y) {
                 hero.x = x;
                 hero.y = y;
@@ -54,13 +54,7 @@ void afficher(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& 
                         std::cout << "E";
                     }
                 }
-
-
-
-
             }
-
-            
         }
         std::cout << '\n';
     }
@@ -78,7 +72,7 @@ void degats(Hero& hero,  std::vector<Ennemie>& ene) {
 }
 
 
-void deplacerPersonnage(int& x,int& y,int direction,int grille[longueur * largeur]) {
+void deplacerPersonnage(int& x,int& y,int direction,int map[longueur * largeur]) {
     int newx = x;
     int newy = y;
 
@@ -94,25 +88,19 @@ void deplacerPersonnage(int& x,int& y,int direction,int grille[longueur * largeu
     else if (direction == 3) {
         newx++;
     }
-
-   
     if (newx < 0 || newx >= longueur ||
         newy < 0 || newy >= largeur) {
         return;
     }
-
-  
-    if (grille[newy * longueur + newx] == 1) {
+    if (map[newy * longueur + newx] == 1) {
         return;
     }
-
- 
     x = newx;
     y = newy;
 }
 
 
-void mouvementHero(Hero& hero,int grille[longueur * largeur]) {
+void mouvementHero(Hero& hero,int map[longueur * largeur]) {
     std::cout << '\n' << "PV du joueur : " << hero.PV;
 
     char touche;
@@ -133,98 +121,117 @@ void mouvementHero(Hero& hero,int grille[longueur * largeur]) {
         direction = 3;
     }
 
-    if (direction != -1) {deplacerPersonnage(hero.x, hero.y, direction, grille);
+    if (direction != -1) {deplacerPersonnage(hero.x, hero.y, direction, map);
     }
 }
 
 
-void mouvementEnnemie(int grille[longueur * largeur],std::vector<Ennemie>& ene) {
+void mouvementEnnemie(int map[longueur * largeur],std::vector<Ennemie>& ene) {
     for (size_t i = 0; i < ene.size(); i++) {
         int direction = rand() % 4;
 
-        deplacerPersonnage(ene[i].x,ene[i].y,direction,grille);
+        deplacerPersonnage(ene[i].x,ene[i].y,direction,map);
     }
 }
 
-    void niveau(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
-        while (grille[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
-            afficher(grille, hero, ene);
-            mouvementHero(hero, grille);
+    void niveau(int map[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
+        while (map[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
+            afficher(map, hero, ene);
+            mouvementHero(hero, map);
             degats(hero, ene);
-            mouvementEnnemie(grille, ene);
+            mouvementEnnemie(map, ene);
             degats(hero, ene);
         }
        
     }
 
-    bool victoire(int grille[longueur * largeur], Hero& hero) {
-        if (grille[hero.y * longueur + hero.x] == 5) {
-            return TRUE;
-        }
+    bool victoire(int map[longueur * largeur], Hero& hero) {
+        return map[hero.y * longueur + hero.x] == 5;
     }
     
     bool defaite(Hero& hero) {
-        if (hero.PV == 0) {
-            return TRUE;
-        }
+        return hero.PV <= 0;
     }
 
 
 
 int main()
 {
-    int grille1[longueur * largeur] = {};
-    int grille2[longueur * largeur] = {};
+    int niveauActuel = 0;
+    const int nombreNiveaux = 2;
+
+    int map[2][longueur * largeur] = {};
 
     Hero p1;
     p1.y = 1;
-    Hero p2;
-    p2.x = 4;
 	
     
     std::vector<Ennemie> nbEnnemie(3);
 
 
     for (int i = 0; i < longueur * largeur; i++) {
-        grille1[i] = 0;
+        map[0][i] = 0;
     }
+
     for (int i = 4; i < 7; i++) {
         for (int j = 10; j < 13; j++) {
-            grille1[i * longueur + j] = 1;
+            map[0][i * longueur + j] = 1;
         }
     }
-    grille1[195] = 5;
+
+    map[0][195] = 5;
 
     for (int i = 0; i < longueur * largeur; i++) {
-        grille2[i] = 0;
+        map[1][i] = 0;
     }
+
     for (int i = 2; i < 6; i++) {
         for (int j = 1; j < 8; j++) {
-            grille2[i * longueur + j] = 2;
+            map[1][i * longueur + j] = 2;
         }
     }
+
     for (int i = 5; i < 9; i++) {
         for (int j = 0; j < 8; j++) {
-            grille2[i * longueur + j] = 1;
+            map[1][i * longueur + j] = 1;
         }
     }
-    grille2[190] = 5;
+
+    map[1][190] = 5;
 
 
-    niveau(grille1, p1, nbEnnemie);
-    if (victoire(grille1, p1)) {
-        system("cls");
-        std::cout << "Niveau suivant";
-        Sleep(2500);
-        niveau(grille2, p2, nbEnnemie);
+    while (niveauActuel < nombreNiveaux && p1.PV > 0)
+    {
+        
+        niveau(map[niveauActuel], p1, nbEnnemie);
+
+        if (defaite(p1))
+        {
+            system("cls");
+            std::cout << "GAME OVER";
+            break;
+        }
+
+        if (victoire(map[niveauActuel], p1))
+        {
+            niveauActuel++;
+
+            if (niveauActuel < nombreNiveaux)
+            {
+                p1.x = 0;
+                p1.y = 1;
+
+                system("cls");
+                std::cout << "Niveau suivant";
+                Sleep(2500);
+            }
+            else
+            {
+                system("cls");
+                std::cout << "Felicitation, tu as termine le jeu !";
+            }
+        }
     }
-    else if(defaite(p1)) {
-        system("cls");
-        std::cout << "GAME OVER";
-    }
-   
-   
-    
 }
 
 
