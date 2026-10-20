@@ -78,83 +78,73 @@ void degats(Hero& hero,  std::vector<Ennemie>& ene) {
 }
 
 
+void deplacerPersonnage(int& x,int& y,int direction,int grille[longueur * largeur]) {
+    int newx = x;
+    int newy = y;
 
-    void mouvementHero(Hero & hero, int grille[longueur * largeur]) {
-        std::cout << '\n'  << "PV du joueur :" << hero.PV;
+    if (direction == 0) {
+        newy--;
+    }
+    else if (direction == 1) {
+        newy++;
+    }
+    else if (direction == 2) {
+        newx--;
+    }
+    else if (direction == 3) {
+        newx++;
+    }
+
+   
+    if (newx < 0 || newx >= longueur ||
+        newy < 0 || newy >= largeur) {
+        return;
+    }
+
+  
+    if (grille[newy * longueur + newx] == 1) {
+        return;
+    }
+
+ 
+    x = newx;
+    y = newy;
+}
+
+
+void mouvementHero(Hero& hero,int grille[longueur * largeur]) {
+    std::cout << '\n' << "PV du joueur : " << hero.PV;
+
     char touche;
     std::cin >> touche;
+
+    int direction = -1;
+
     if (touche == 'z' || touche == 'Z') {
-        hero.y -= 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.y < 0) {
-            hero.y += 1;
-        }
-       
+        direction = 0;
     }
-    if (touche == 's' || touche == 'S') {
-        hero.y += 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.y > 9) {
-            hero.y -= 1;
-        }
-        
+    else if (touche == 's' || touche == 'S') {
+        direction = 1;
     }
-    if (touche == 'd' || touche == 'D') {
-        hero.x += 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.x > 19) {
-            hero.x -= 1;
-        }
-       
+    else if (touche == 'q' || touche == 'Q') {
+        direction = 2;
     }
-    if (touche == 'q' || touche == 'Q') {
-        hero.x -= 1;
-        if (grille[hero.y * longueur + hero.x] == 1 || hero.x < 0) {
-            hero.x += 1;
-        }
-       
+    else if (touche == 'd' || touche == 'D') {
+        direction = 3;
+    }
+
+    if (direction != -1) {deplacerPersonnage(hero.x, hero.y, direction, grille);
     }
 }
 
 
-    void mouvementEnnemie(int grille[longueur * largeur], std::vector<Ennemie>& ene) {
-        size_t taille = ene.size();
-        for (int i = 0; i < taille; i++) {
-            int direct = rand() % 4;
-            int newx = ene[i].x;
-            int newy = ene[i].y;
+void mouvementEnnemie(int grille[longueur * largeur],std::vector<Ennemie>& ene) {
+    for (size_t i = 0; i < ene.size(); i++) {
+        int direction = rand() % 4;
 
-
-            if (direct == 0) {
-                newy -= 1;
-                if (grille[newy * longueur + newx] == 1 || newy < 0) {
-                    newy += 1;
-                }
-                ene[i].y = newy;
-            }
-           
-            if (direct == 1) {
-                newy += 1;
-                if (grille[newy * longueur + newx] == 1 || newy > 9) {
-                    newy -= 1;
-                }
-                ene[i].y = newy;
-            }
-            
-            if (direct == 2) {
-                newx -= 1;
-                if (grille[newy * longueur + newx] == 1 || newx < 0) {
-                    newx += 1;
-                }
-                ene[i].x = newx;
-            }
-            if (direct == 3) {
-                newx += 1;
-                if (grille[newy * longueur + newx] == 1 || newx > 19) {
-                    newx -= 1;
-                }
-                ene[i].x = newx;
-            }
-        }
+        deplacerPersonnage(ene[i].x,ene[i].y,direction,grille);
     }
-    
+}
 
     void niveau(int grille[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
         while (grille[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
@@ -185,8 +175,6 @@ int main()
 {
     int grille1[longueur * largeur] = {};
     int grille2[longueur * largeur] = {};
-
-
 
     Hero p1;
     p1.y = 1;
