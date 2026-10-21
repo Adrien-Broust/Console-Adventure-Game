@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <curses.h>
 
 const int longueur = 20;
 const int largeur = 10;
@@ -20,43 +21,58 @@ struct Ennemie
     int y = 0;
 };
 
+enum Carte {
+    .,
+};
+
 void afficher(int map[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
-    system("cls");
+    clear();
+    refresh();
     size_t taille = ene.size();
     for (int y = 0; y < largeur; y++) {
         for (int x = 0; x < longueur; x++) {
             int sauv = map[y * longueur + x];
             if (x == hero.x && y == hero.y) {
-                hero.x = x;
-                hero.y = y;
-                std::cout << "H";
+                attron(COLOR_PAIR(3));
+                printw("H");
+                attroff(COLOR_PAIR(3));
             }
             else {
                 bool ennemiAffiche = false;
                 for (int i = 0; i < taille; i++) {
                     if (x == ene[i].x && y == ene[i].y) {
-                        std::cout << "X";
+                        attron(COLOR_PAIR(2));
+                        printw("X");
+                        attroff(COLOR_PAIR(2));;
                         ennemiAffiche = true;
                         break;
                     }
                 }
                 if (!ennemiAffiche) {
                     if (sauv == 0) {
-                        std::cout << ".";
+                        attron(COLOR_PAIR(8));
+                        printw(".");
+                        attroff(COLOR_PAIR(8));
                     }
                     if (sauv == 1) {
-                        std::cout << "A";
+                        attron(COLOR_PAIR(1));
+                        printw("A");
+                        attroff(COLOR_PAIR(1));
                     }
                     if (sauv == 2) {
-                        std::cout << "~";
+                        attron(COLOR_PAIR(7));
+                        printw("~");
+                        attroff(COLOR_PAIR(7));
                     }
                     if (sauv == 5) {
-                        std::cout << "E";
+                        attron(COLOR_PAIR(4));
+                        printw("E");
+                        attroff(COLOR_PAIR(4));
                     }
                 }
             }
         }
-        std::cout << '\n';
+        printw("\n");
     }
 }
 
@@ -65,14 +81,14 @@ void degats(Hero& hero,  std::vector<Ennemie>& ene) {
     size_t taille = ene.size();
     for (int i = 0; i < taille; i++) {
         if (ene[i].x == hero.x && ene[i].y == hero.y) {
-            hero.PV -= 1;
-            std::cout << '\n' << "Touche !";
+            hero.PV--;
+            break;
         }
     }
 }
 
 
-void deplacerPersonnage(int& x,int& y,int direction,int map[longueur * largeur]) {
+void deplacer(int& x,int& y,int direction,int map[longueur * largeur]) {
     int newx = x;
     int newy = y;
 
@@ -101,10 +117,13 @@ void deplacerPersonnage(int& x,int& y,int direction,int map[longueur * largeur])
 
 
 void mouvementHero(Hero& hero,int map[longueur * largeur]) {
-    std::cout << '\n' << "PV du joueur : " << hero.PV;
+    printw("\n");
+    attron(COLOR_PAIR(3));
+    printw("PV du joueur : %d", hero.PV);
+    attroff(COLOR_PAIR(3));
 
-    char touche;
-    std::cin >> touche;
+    char touche = getch();
+    
 
     int direction = -1;
 
@@ -121,7 +140,7 @@ void mouvementHero(Hero& hero,int map[longueur * largeur]) {
         direction = 3;
     }
 
-    if (direction != -1) {deplacerPersonnage(hero.x, hero.y, direction, map);
+    if (direction != -1) {deplacer(hero.x, hero.y, direction, map);
     }
 }
 
@@ -130,33 +149,48 @@ void mouvementEnnemie(int map[longueur * largeur],std::vector<Ennemie>& ene) {
     for (size_t i = 0; i < ene.size(); i++) {
         int direction = rand() % 4;
 
-        deplacerPersonnage(ene[i].x,ene[i].y,direction,map);
+        deplacer(ene[i].x,ene[i].y,direction,map);
     }
 }
 
-    void niveau(int map[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
-        while (map[hero.y * longueur + hero.x] != 5 && hero.PV != 0) {
-            afficher(map, hero, ene);
-            mouvementHero(hero, map);
-            degats(hero, ene);
-            mouvementEnnemie(map, ene);
-            degats(hero, ene);
-        }
+void niveau(int map[longueur * largeur], Hero& hero, std::vector<Ennemie>& ene) {
+    while (map[hero.y * longueur + hero.x] != 5 && hero.PV > 0) {
+        afficher(map, hero, ene);
+        mouvementHero(hero, map);
+        degats(hero, ene);
+        mouvementEnnemie(map, ene);
+        degats(hero, ene);
+    }
        
-    }
+}
 
-    bool victoire(int map[longueur * largeur], Hero& hero) {
-        return map[hero.y * longueur + hero.x] == 5;
-    }
+bool victoire(int map[longueur * largeur], Hero& hero) {
+    return map[hero.y * longueur + hero.x] == 5;
+}
     
-    bool defaite(Hero& hero) {
-        return hero.PV <= 0;
-    }
+bool defaite(Hero& hero) {
+    return hero.PV <= 0;
+}
 
 
 
 int main()
 {
+    initscr();
+
+    start_color();
+
+    init_pair(1, COLOR_WHITE, COLOR_WHITE);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_GREEN, COLOR_BLACK);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(5, COLOR_BLUE, COLOR_BLACK);
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(7, COLOR_CYAN, COLOR_BLACK);
+    init_pair(8, COLOR_WHITE, COLOR_BLACK);
+
+    
+
     int niveauActuel = 0;
     const int nombreNiveaux = 2;
 
@@ -202,36 +236,48 @@ int main()
 
     while (niveauActuel < nombreNiveaux && p1.PV > 0)
     {
-        
         niveau(map[niveauActuel], p1, nbEnnemie);
-
         if (defaite(p1))
         {
-            system("cls");
-            std::cout << "GAME OVER";
+            clear();
+            
+            attron(COLOR_PAIR(2));
+            printw("======GAME OVER======");
+            attroff(COLOR_PAIR(2));
+            refresh();
+            getch();
             break;
         }
 
         if (victoire(map[niveauActuel], p1))
         {
             niveauActuel++;
-
             if (niveauActuel < nombreNiveaux)
             {
-                p1.x = 0;
+                p1.x = 5;
                 p1.y = 1;
 
-                system("cls");
-                std::cout << "Niveau suivant";
+                clear();
+               
+                attron(COLOR_PAIR(8));
+                printw("======Niveau suivant======");
+                attroff(COLOR_PAIR(8));
+                refresh();
                 Sleep(2500);
             }
             else
             {
-                system("cls");
-                std::cout << "Felicitation, tu as termine le jeu !";
+                clear();
+                
+                attron(COLOR_PAIR(4));
+                printw("======VICTOIRE======");
+                attroff(COLOR_PAIR(4));
+                refresh();
+                getch();
             }
         }
     }
+    endwin();
 }
 
 
